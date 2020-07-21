@@ -6,6 +6,7 @@ const helper = require('./test_helper')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 describe('when there are initially some blogs saved', () => {
   beforeEach(async () => {
@@ -125,6 +126,114 @@ describe('when there are initially some blogs saved', () => {
 
 
     expect(updated_blog.body.likes).toBe(blogToUpdate.likes+1)
+  })
+
+  describe("don't add invalid users" , () => {
+    beforeEach(async () => {
+  
+      await User.deleteMany({})
+  
+      const userObjects = helper.initialUsers
+        .map(user => new User(user))
+      const promiseArray = userObjects.map(user => user.save())
+      await Promise.all(promiseArray)
+    })
+  
+    test('username must be unique', async () => {
+      const usersAtStart = await helper.usersInDb()
+  
+      const user1 = {
+        username: 'testuser',
+        name: 'Frank',
+        password: 'secure'
+      }
+      const user2 = {
+        username: 'testuser',
+        name: 'Hank',
+        password: 'secure2'
+      }
+  
+      await api
+        .post('/api/users')
+        .send(user1)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+  
+      const result = await api
+        .post('/api/users')
+        .send(user2)
+        .expect(400)
+        .expect('Content-Type', /application\/json/)
+  
+        expect(result.body.error).toContain('`username` to be unique')
+  
+      const usersAtEnd = await helper.usersInDb()
+      expect(usersAtEnd).toHaveLength(usersAtStart.length+1)
+    })
+  
+    test('username must exist', async () => {
+      const usersAtStart = await helper.usersInDb()
+      const user = {
+        name: 'Frank',
+        password: 'secure'
+      }
+      await api
+        .post('/api/users')
+        .send(user)
+        .expect(400)
+  
+  
+        const usersAtEnd = await helper.usersInDb()
+        expect(usersAtEnd).toHaveLength(usersAtStart.length)  
+      })
+
+      test('password must exist', async () => {
+        const usersAtStart = await helper.usersInDb()
+        const user = {
+          username: 'my_user',
+          name: 'Frank'
+        }
+        await api
+          .post('/api/users')
+          .send(user)
+          .expect(400)
+    
+    
+          const usersAtEnd = await helper.usersInDb()
+          expect(usersAtEnd).toHaveLength(usersAtStart.length)  
+        })
+        test('username must be more than two characters long', async () => {
+          const usersAtStart = await helper.usersInDb()
+          const user = {
+            username: 'aa',
+            name: 'Frank',
+            password:'secure'
+          }
+          await api
+            .post('/api/users')
+            .send(user)
+            .expect(400)
+      
+      
+            const usersAtEnd = await helper.usersInDb()
+            expect(usersAtEnd).toHaveLength(usersAtStart.length)  
+          })
+          test('password must be more than two characters long', async () => {
+            const usersAtStart = await helper.usersInDb()
+            const user = {
+              username: 'short password',
+              name: 'Frank',
+              password: 'aa'
+            }
+            await api
+              .post('/api/users')
+              .send(user)
+              .expect(400)
+        
+        
+              const usersAtEnd = await helper.usersInDb()
+              expect(usersAtEnd).toHaveLength(usersAtStart.length)  
+            })
   })
 })
 afterAll(() => {
