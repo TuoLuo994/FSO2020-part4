@@ -36,6 +36,15 @@ describe('when there are initially some blogs saved', () => {
 
   describe('adding new blogs', () => {
     test('addition succeeds with valid data', async () => {
+      const logInCreds = {
+        "username": "Tupa",
+        "password": "salis"
+      }
+  
+      const token = await api
+        .post('/api/login/')
+        .send(logInCreds)
+
       const newBlog = {
         title: 'New Blog Post',
         author: 'Frank',
@@ -45,6 +54,7 @@ describe('when there are initially some blogs saved', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', 'bearer ' + token.body.token)
         .send(newBlog)
         .expect(200)
         .expect('Content-Type', /application\/json/)
@@ -60,6 +70,15 @@ describe('when there are initially some blogs saved', () => {
     })
 
     test('default likes is zero', async () => {
+      const logInCreds = {
+        "username": "Tepa",
+        "password": "passu"
+      }
+  
+      const token = await api
+        .post('/api/login/')
+        .send(logInCreds)
+
       const newBlog = {
         title: 'Blog with zero likes',
         author: 'Hank',
@@ -68,6 +87,7 @@ describe('when there are initially some blogs saved', () => {
 
       added_blog = await api
         .post('/api/blogs')
+        .set('Authorization', 'bearer ' + token.body.token)
         .send(newBlog)
         .expect(200)
 
@@ -75,6 +95,15 @@ describe('when there are initially some blogs saved', () => {
     })
 
     test('code 400 if no title or url', async () => {
+      const logInCreds = {
+        "username": "Tupa",
+        "password": "salis"
+      }
+  
+      const token = await api
+        .post('/api/login/')
+        .send(logInCreds)
+
       const newBlog = {
         author: 'Harry',
         likes: 0
@@ -82,16 +111,45 @@ describe('when there are initially some blogs saved', () => {
 
       added_blog = await api
         .post('/api/blogs')
+        .set('Authorization', 'bearer ' + token.body.token)
         .send(newBlog)
         .expect(400)
+    })
+
+
+    test('code 401 if no token', async () => {
+      const newBlog = {
+        title: 'New Blog Post',
+        author: 'Frank',
+        url: 'new-post-2020',
+        likes: 0
+      }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(401)
+
+
+      const blogsAtEnd = await helper.blogsInDb()
+      expect(blogsAtEnd.length).toBe(helper.initialBlogs.length)
     })
   })
   test('delete existing blog', async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToDelete = blogsAtStart[0]
 
+    const logInCreds = {
+      "username": "Tupa",
+      "password": "salis"
+    }
+
+    const token = await api
+      .post('/api/login/')
+      .send(logInCreds)
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', 'bearer ' + token.body.token)
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()

@@ -3,39 +3,38 @@ const User = require('../models/user')
 
 const initialBlogs = [
     {
-        title: "First",
-        author: "TL",
-        url: "first-one",
         likes: 0,
-        id: "5ef9e4a4bd44ae27d89b8e23"
-    },
-    {
-        title: "2nd",
-        author: "TL",
-        url: "second-one",
-        likes: 2,
-        id: "5efdafaa4bd44ae27d89b8e23"
-    },
-    {
         title: "Hello World",
-        author: "Matt",
-        url: "hello-world",
-        likes: 1001,
-        id: "5ef9fdafad4d44ae27d89b8e23"
+        author: "Angus Young",
+        url: "www.google.com",
+        id: "5f16fabd11a3296d51e749b0",
+        user: "5f16f9d623739b6ba591ada0"
+    },
+    {
+        likes: 0,
+        title: "What is cheese?",
+        author: "John Wick",
+        url: "www.cheese.io",
+        id: "5f16fafa11a3296d51e749b1",
+        user: "5f16f9da23739b6ba591ada1"
     }
 ]
 
 const initialUsers = [
     {
-        username: "Test",
-        name: "Testi Ukko",
-        id: "5f10831f205615657681ee00"
+        "_id": "5f16f9d623739b6ba591ada0",
+        "blogs": [],
+        "username": "Tupa",
+        "name": "Tuomas",
+        "passwordHash": "$2b$10$d3UmE5oGAVNUcrmO51r4/eguwiSmiS5ji./sqsDp/nE.23gizTfUm",
     },
     {
-        username: "T0hht",
-        name: "Testi Ukko",
-        id: "5f108a168aaef66c93c70b6f"
-    }
+        "_id": "5f16f9da23739b6ba591ada1",
+        "blogs": [],
+        "username":"Tepa",
+        "name": "Teemu",
+        "passwordHash": "$2b$10$Q2GKdp/FZRJy/2mrqtLbtuqgmfEmZ1iyCD59Uhsei/twSoxjnMU7K"
+  }
 ]
 const blogsInDb = async () => {
     const blogs = await Blog.find({})
